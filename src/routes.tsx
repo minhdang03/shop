@@ -20,8 +20,8 @@ export default function PageRoutes(){
 				<Route path={'checkout'} element={<Checkout/>} />
 				<Route path={'confirmation'} element={<Confirmation/>} />
 				<Route path={'products'} element={<Products/>} />
-				<Route path={'nam'} element={<MenPerfumePage/>} />
-				<Route path={'nu'} element={<WomenPage/>} />
+				<Route path={'nuoc-hoa-nam'} element={<MenPerfumePage/>} />
+				<Route path={'nuoc-hoa-nu'} element={<WomenPage/>} />
 				<Route path={'san-pham/:id'} element={<ProductDetails />} />
 				<Route path={'*'} element={<NotFound/>} />
 			</Route>

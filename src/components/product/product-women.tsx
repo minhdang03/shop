@@ -5,7 +5,7 @@ import ProductCard from "./ProductCard";
 import { Product } from "../../types/product";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-const ITEMS_PER_PAGE = 12; // Số sản phẩm mỗi lần load
+const ITEMS_PER_PAGE = 20; // Số sản phẩm mỗi lần load
 
 export default function ProductWomen() {
   useDocumentTitle('Nước hoa nữ');
@@ -68,7 +68,7 @@ export default function ProductWomen() {
   if (isLoading) {
     return (
       <div className="container mx-auto">
-        <h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nữ</h1>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 animate-pulse">
           {[...Array(8)].map((_, index) => (
             <div key={index} className="bg-gray-200 rounded-lg h-[300px]"></div>
@@ -80,7 +80,6 @@ export default function ProductWomen() {
 
   return (
     <div className="container mx-auto">
-      <h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nữ</h1>
       <InfiniteScroll
         dataLength={displayedProducts.length}
         next={loadMore}
