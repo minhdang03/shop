@@ -5,14 +5,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { HelmetProvider } from 'react-helmet-async';
+import { BrowserRouter } from "react-router-dom";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1
-    }
-  }
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 phút
+    },
+  },
 });
 
 export default function App() {
@@ -20,18 +22,19 @@ export default function App() {
     <HelmetProvider>
       <ErrorBoundary fallback={<div>Đã có lỗi xảy ra</div>}>
         <QueryClientProvider client={queryClient}>
-          <Suspense fallback={<div>Đang tải...</div>}>
-            <div className="min-h-screen bg-gray-50">
-              <PageRoutes />
-              <Toaster 
-                position="top-right" 
-                containerStyle={{
-                  top: 100  // hoặc có thể điều chỉnh số này tùy theo chiều cao của navbar
-                }}
-                containerClassName="px-4 sm:px-0"
-              />
-            </div>
-          </Suspense>
+          <BrowserRouter>
+            <PageRoutes />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+              }}
+            />
+          </BrowserRouter>
         </QueryClientProvider>
       </ErrorBoundary>
     </HelmetProvider>
