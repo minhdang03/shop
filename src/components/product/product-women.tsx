@@ -1,106 +1,75 @@
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, lazy } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { useEffect, useState } from "react";
 import { API_URL } from "../../config/constants";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
-import ProductCard from "./ProductCard";
 import { Product } from "../../types/product";
-import InfiniteScroll from "react-infinite-scroll-component";
+import { Link } from "react-router-dom";
 
-const ITEMS_PER_PAGE = 20; // Số sản phẩm mỗi lần load
+const ProductCard = lazy(() => import('./ProductCard'));
+const ProductSkeleton = lazy(() => import('../shared/ProductSkeleton'));
 
-export default function ProductWomen() {
+export default function ProductWomen({ limit = 0 }) {
   useDocumentTitle('Nước hoa nữ');
   const [products, setProducts] = useState<Product[]>([]);
-  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { ref, inView } = useInView({
+    threshold: 0,
+    triggerOnce: true
+  });
 
-  // Fetch tất cả sản phẩm một lần
   useEffect(() => {
-    const fetchAllProducts = async () => {
+    const fetchProducts = async () => {
       try {
-        setIsLoading(true);
         const response = await fetch(
           `${API_URL}/api/user/products?category=676057995957fd2f56673f7d`
         );
         const data = await response.json();
         if (data.success) {
+          // Lấy tất cả sản phẩm
           setProducts(data.data);
-          // Hiển thị trang đầu tiên
-          setDisplayedProducts(data.data.slice(0, ITEMS_PER_PAGE));
         } else {
           setError("Không thể tải dữ liệu sản phẩm");
         }
       } catch (err) {
         setError("Đã xảy ra lỗi khi tải dữ liệu");
-      } finally {
-        setIsLoading(false);
       }
     };
-    fetchAllProducts();
+    fetchProducts();
   }, []);
 
-  // Hàm load thêm sản phẩm
-  const loadMore = useCallback(() => {
-    const nextPage = page + 1;
-    const start = (nextPage - 1) * ITEMS_PER_PAGE;
-    const end = nextPage * ITEMS_PER_PAGE;
-    
-    const newProducts = products.slice(start, end);
-    if (newProducts.length > 0) {
-      setDisplayedProducts(prev => [...prev, ...newProducts]);
-      setPage(nextPage);
-    }
-    if (end >= products.length) {
-      setHasMore(false);
-    }
-  }, [page, products]);
-
   if (error) {
-    return (
-      <div className="text-center text-red-500 p-4">
-        {error}
-      </div>
-    );
+    return <div className="text-center text-red-500 p-4">{error}</div>;
   }
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto">
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 animate-pulse">
-          {[...Array(8)].map((_, index) => (
-            <div key={index} className="bg-gray-200 rounded-lg h-[300px]"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  // Nếu có limit thì chỉ hiển thị số lượng theo limit
+  const displayedProducts = limit > 0 ? products.slice(0, limit) : products;
 
   return (
-    <div className="container mx-auto">
-      <InfiniteScroll
-        dataLength={displayedProducts.length}
-        next={loadMore}
-        hasMore={hasMore}
-        loader={
-          <div className="flex justify-center p-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        }
-        endMessage={
-          <p className="text-center text-gray-500 p-4">
-            Đã hiển thị tất cả sản phẩm
-          </p>
-        }
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
-          {displayedProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
+    <div className="container mx-auto" ref={ref}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+        {inView ? (
+          displayedProducts.map((product) => (
+            <Suspense key={product._id} fallback={<ProductSkeleton />}>
+              <ProductCard product={product} />
+            </Suspense>
+          ))
+        ) : (
+          Array(limit || products.length || 3).fill(0).map((_, idx) => (
+            <ProductSkeleton key={idx} />
+          ))
+        )}
+      </div>
+      {limit > 0 && products.length > limit && inView && (
+        <div className="text-center mb-8">
+          <Link
+            to="/nuoc-hoa-nu"
+            className="inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Xem tất cả
+          </Link>
         </div>
-      </InfiniteScroll>
+      )}
     </div>
   );
 }

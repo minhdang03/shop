@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { API_URL } from '../../config/constants';
 import { Product, ProductVariant } from '../../types/product';
 import { useCartStore } from '../../store/cart-store';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { toast } from 'react-hot-toast';
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
@@ -21,38 +22,36 @@ export default function ProductDetails() {
       if (data.success) {
         setSelectedImage(data.data.variants[0].image);
         setSelectedVariant(data.data.variants[0]);
-        return data.data;
+        return data.data as Product;
       }
       throw new Error('Failed to fetch product');
     }
   });
 
-  useDocumentTitle(product?.name || 'Chi tiết sản phẩm');
+  useEffect(() => {
+    if (product?.name) {
+      document.title = `${product.name} | Pino Perfume`;
+    } else {
+      document.title = 'Chi tiết sản phẩm | Pino Perfume';
+    }
+  }, [product?.name]);
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
 
-    cartStore.add({
+    cartStore.addToCart({
       product: {
         id: product._id,
         name: product.name,
         price: selectedVariant.price,
-        variant: {
-          _id: selectedVariant._id,
-          name: selectedVariant.name,
-          price: selectedVariant.price,
-          image: selectedVariant.image,
-          attributes: {
-            SIZE: selectedVariant.attributes.SIZE
-          }
-        }
+        variant: selectedVariant
       },
       product_id: product._id,
       variant_id: selectedVariant._id,
       quantity: quantity
     });
 
-    alert('Đã thêm vào giỏ hàng!');
+    toast.success('Đã thêm vào giỏ hàng!');
   };
 
   if (!product) return null;
@@ -60,14 +59,14 @@ export default function ProductDetails() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
-      <div className="mb-8 text-sm text-gray-600">
+      <div className="mb-8 text-sm text-gray-600 pt-6">
         <Link to="/" className="hover:text-blue-500">Trang chủ</Link>
         <span className="mx-2">/</span>
         <Link 
-          to={`/${product?.category.name === "Nước hoa nam" ? "nuoc-hoa-nam" : "nuoc-hoa-nu"}`} 
+          to={`/${product.category.name === "Nước hoa nam" ? "nuoc-hoa-nam" : "nuoc-hoa-nu"}`} 
           className="hover:text-blue-500"
         >
-          {product?.category.name}
+          {product.category.name}
         </Link>
       </div>
 
@@ -91,7 +90,7 @@ export default function ProductDetails() {
             {/* Rating và Trạng thái */}
             <div className="flex items-center gap-6">
               <div className="flex items-center">
-                <div className="flex text-yellow-400 mr-2">
+                <div className="flex text-pink-500 mr-2">
                   <span>★</span>
                   <span>★</span>
                   <span>★</span>
@@ -122,7 +121,7 @@ export default function ProductDetails() {
             <div className="space-y-4">
               <p className="text-sm text-gray-600">Dung tích:</p>
               <div className="flex flex-wrap gap-3">
-                {product.variants.map((variant) => (
+                {product.variants.map((variant: ProductVariant) => (
                   <button
                     key={variant._id}
                     onClick={() => {
@@ -131,8 +130,8 @@ export default function ProductDetails() {
                     }}
                     className={`px-6 py-3 border-2 rounded-lg transition-all ${
                       selectedVariant?._id === variant._id
-                        ? 'border-black bg-black text-white'
-                        : 'border-gray-200 hover:border-gray-400'
+                        ? 'border-pink-500 bg-pink-500 text-white'
+                        : 'border-gray-200 hover:border-pink-300'
                     }`}
                   >
                     {variant.attributes.SIZE}
@@ -178,7 +177,7 @@ export default function ProductDetails() {
 
               <button 
                 onClick={handleAddToCart}
-                className="flex-1 bg-black text-white py-4 px-6 rounded-lg hover:bg-gray-800 transition-colors"
+                className="flex-1 bg-pink-500 text-white py-4 px-6 rounded-lg hover:bg-pink-600 transition-colors"
                 disabled={!selectedVariant}
               >
                 Thêm vào giỏ
@@ -195,17 +194,12 @@ export default function ProductDetails() {
                   </svg>
                   <span>Cam kết chính hãng 100%</span>
                 </div>
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span>Đổi trả trong 7 ngày</span>
-                </div>
+
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                  <span>Miễn phí giao hàng từ 1tr</span>
+                  <span>Miễn phí giao hàng từ 500.000 VNĐ</span>
                 </div>
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,24 +1,40 @@
 import {Link, Outlet} from "react-router-dom";
 import React, {useState} from "react";
 import {useCartStore} from "./store/cart-store";
+import Footer from "./components/Footer";
     
 export default function Layout() {
     const cartStore = useCartStore();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    // Thêm effect để theo dõi scroll
+    React.useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 40) { // 40px là chiều cao của phần hotline
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
         <div className="min-h-screen w-full">
             {/* Hotline */}
-            <div className="w-screen bg-gradient-to-r from-pink-400 to-pink-500">
+            <div className="w-full bg-gradient-to-r from-pink-400 to-pink-500">
                 <div className="w-full max-w-[1200px] md:max-w-none md:w-[95%] lg:w-[90%] mx-auto">
                     <div className="w-full flex justify-end px-8 py-1 text-sm text-white">
-                        Hotline: 0909090909
+                        Hotline: 0792299471
                     </div>
                 </div>
             </div>
 
-            {/* Navigation */}
-            <nav className="w-screen bg-white/80 backdrop-blur-md shadow-sm fixed top-0 z-50">
+            {/* Navigation - Thêm điều kiện cho top */}
+            <nav className={`w-full fixed ${isScrolled ? 'top-0' : 'top-6'} left-0 right-0 bg-white/80 backdrop-blur-md shadow-sm z-50 transition-all duration-200`}>
                 <div className="w-full max-w-[1200px] md:max-w-none md:w-[95%] lg:w-[90%] mx-auto">
                     <div className="flex justify-between items-center py-4">
                         {/* Logo */}
@@ -39,7 +55,7 @@ export default function Layout() {
                             <Link to={'/checkout'} className="py-2 px-4 text-white bg-pink-500 hover:bg-pink-600 rounded-full transition duration-300 flex items-center">
                                 Giỏ hàng 
                                 <span className="ml-2 bg-white text-pink-500 rounded-full px-2 py-1 text-xs font-medium">
-                                    {cartStore.list.length}
+                                    {cartStore.getTotalItems()}
                                 </span>
                             </Link>
                         </div>
@@ -86,6 +102,7 @@ export default function Layout() {
                     <Outlet/>
                 </div>
             </main>
+            <Footer/>       
         </div>
     );
 }

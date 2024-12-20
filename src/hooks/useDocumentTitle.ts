@@ -1,12 +1,17 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
-export function useDocumentTitle(title: string) {
+export function useDocumentTitle(title: string, isPage: boolean = false) {
+  const location = useLocation();
+
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = `${title} | PINO SHOP`;
+    document.title = `${title} | PINO.VN`;
 
     return () => {
-      document.title = prevTitle;
+      if (isPage) {
+        document.title = prevTitle;
+      }
     };
-  }, [title]);
+  }, [title, isPage, location]);
 } 

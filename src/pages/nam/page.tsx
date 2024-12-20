@@ -1,9 +1,14 @@
 import ProductMen from "../../components/product/product-men";
-import MainSlide from "../../components/mainslide";
-export default function NamPage() {
+import MenSlide from "../../components/slide/menslide";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+
+export default function MenPage() {
+	useDocumentTitle('Nước hoa nam');
+	
 	return (
-		<main>
-            <h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nam</h1>
+		<main className="container mx-auto">
+			<MenSlide/>
+			<h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nam</h1>
 			<ProductMen />
 		</main>
 	);

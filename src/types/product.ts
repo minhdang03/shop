@@ -12,6 +12,7 @@ export interface ProductVariant {
 }
 
 export interface Product {
+  price: number;
   _id: string;
   name: string;
   description?: string;
@@ -20,6 +21,7 @@ export interface Product {
     name: string;
   };
   category: {
+    [x: string]: any;
     _id: string;
     name: string;
   };

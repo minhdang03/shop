@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { useState } from "react";
 import { Product, ProductVariant } from "../../types/product";
+import BlurImage from '../shared/BlurImage';
 
 interface ProductCardProps {
   product: Product;
@@ -18,14 +19,13 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link to={`/san-pham/${product._id}`} className="block h-full">
-      <div className="bg-white hover:shadow-lg hover:rounded-lg transition-shadow h-full flex flex-col">
+      <div className="bg-white hover:shadow-lg hover:rounded-lg transition-shadow h-full flex flex-col group">
         {/* Phần hình ảnh */}
-        <div className="relative h-[220px] flex items-center justify-center p-2 flex-shrink-0">
-          <LazyLoadImage
+        <div className="relative h-[220px] flex items-center justify-center p-2 flex-shrink-0 transition-colors">
+          <BlurImage
             src={selectedVariant?.image || product.images[0] || "/images/Unknown.jpg"}
             alt={product.name}
-            className="max-h-[200px] w-auto object-contain"
-            wrapperClassName="flex items-center justify-center"
+            className="max-h-[200px] w-auto object-contain transition-transform group-hover:scale-105"
           />
         </div>
 
@@ -48,8 +48,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                   }}
                   className={`px-2 py-1 text-sm border transition-all ${
                     selectedVariant._id === variant._id
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'bg-white text-gray-900 border-gray-200 hover:border-gray-900 hover:rounded-md'
+                      ? 'bg-pink-500 text-white border-pink-500'
+                      : 'bg-white text-gray-900 border-gray-200 hover:border-pink-300 hover:text-pink-500'
                   }`}
                 >
                   {variant.attributes.SIZE}
@@ -60,7 +60,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Phần giá */}
           <div className="mt-auto">
-            <p className="text-lg font-semibold text-red-500 whitespace-nowrap overflow-hidden text-ellipsis">
+            <p className="text-lg font-semibold text-pink-500 whitespace-nowrap overflow-hidden text-ellipsis">
               {selectedVariant.price.toLocaleString()} VNĐ
             </p>
           </div>

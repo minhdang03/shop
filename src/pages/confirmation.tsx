@@ -21,7 +21,7 @@ interface OrderInfo {
 }
 
 export default function Confirmation() {
-    useDocumentTitle('Đặt hàng thành công');
+    useDocumentTitle('Đặt hàng thành công', true);
     const navigate = useNavigate();
     const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null);
 

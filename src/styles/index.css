@@ -1,0 +1,9 @@
+/* Custom NProgress styles */
+#nprogress .bar {
+  background: #ff04c0 !important; /* blue-600 */
+  height: 3px !important;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #ff04c0, 0 0 5px #ff04c0 !important;
+} 
