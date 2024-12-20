@@ -16,10 +16,8 @@ interface ProductMenProps {
 }
 
 export default function ProductMen({ limit = 0, updateTitle = false }: ProductMenProps) {
-  if (updateTitle) {
-    useDocumentTitle('Nước hoa nam');
-  }
-
+  useDocumentTitle('Nước hoa nam', true);
+  const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { ref, inView } = useInView({

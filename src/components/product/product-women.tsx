@@ -16,10 +16,8 @@ interface ProductWomenProps {
 }
 
 export default function ProductWomen({ limit = 0, updateTitle = false }: ProductWomenProps) {
-  if (updateTitle) {
-    useDocumentTitle('Nước hoa nữ');
-  }
-
+  useDocumentTitle('Nước hoa nữ', true);
+  const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { ref, inView } = useInView({
