@@ -23,7 +23,13 @@ export default function App() {
           <Suspense fallback={<div>Đang tải...</div>}>
             <div className="min-h-screen bg-gray-50">
               <PageRoutes />
-              <Toaster position="top-right" />
+              <Toaster 
+                position="top-right" 
+                containerStyle={{
+                  top: 100  // hoặc có thể điều chỉnh số này tùy theo chiều cao của navbar
+                }}
+                containerClassName="px-4 sm:px-0"
+              />
             </div>
           </Suspense>
         </QueryClientProvider>

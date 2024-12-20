@@ -22,7 +22,7 @@ export default function PageRoutes(){
 				<Route path={'products'} element={<Products/>} />
 				<Route path={'nuoc-hoa-nam'} element={<MenPerfumePage/>} />
 				<Route path={'nuoc-hoa-nu'} element={<WomenPage/>} />
-				<Route path={'san-pham/:id'} element={<ProductDetails />} />
+				<Route path={'san-pham/:id'} element={<ProductDetails updateTitle={true} />} />
 				<Route path={'*'} element={<NotFound/>} />
 			</Route>
 		</Routes>

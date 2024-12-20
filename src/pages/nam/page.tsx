@@ -9,7 +9,7 @@ export default function MenPage() {
 		<main className="container mx-auto">
 			<MenSlide/>
 			<h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nam</h1>
-			<ProductMen />
+			<ProductMen updateTitle={true} />
 		</main>
 	);
 }

@@ -7,7 +7,11 @@ import { useCartStore } from '../../store/cart-store';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { toast } from 'react-hot-toast';
 
-export default function ProductDetails() {
+interface ProductDetailsProps {
+  updateTitle?: boolean;
+}
+
+export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);

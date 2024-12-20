@@ -10,8 +10,16 @@ import { ErrorBoundary } from '../shared/ErrorBoundary';
 const ProductCard = lazy(() => import('./ProductCard'));
 const ProductSkeleton = lazy(() => import('../shared/ProductSkeleton'));
 
-export default function ProductMen({ limit = 0 }) {
-  useDocumentTitle('Nước hoa nam');
+interface ProductMenProps {
+  limit?: number;
+  updateTitle?: boolean;
+}
+
+export default function ProductMen({ limit = 0, updateTitle = false }: ProductMenProps) {
+  if (updateTitle) {
+    useDocumentTitle('Nước hoa nam');
+  }
+
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { ref, inView } = useInView({

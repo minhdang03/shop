@@ -5,12 +5,21 @@ import { API_URL } from "../../config/constants";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Product } from "../../types/product";
 import { Link } from "react-router-dom";
+import { ErrorBoundary } from '../shared/ErrorBoundary';
 
 const ProductCard = lazy(() => import('./ProductCard'));
 const ProductSkeleton = lazy(() => import('../shared/ProductSkeleton'));
 
-export default function ProductWomen({ limit = 0 }) {
-  useDocumentTitle('Nước hoa nữ');
+interface ProductWomenProps {
+  limit?: number;
+  updateTitle?: boolean;
+}
+
+export default function ProductWomen({ limit = 0, updateTitle = false }: ProductWomenProps) {
+  if (updateTitle) {
+    useDocumentTitle('Nước hoa nữ');
+  }
+
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { ref, inView } = useInView({

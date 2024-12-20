@@ -9,7 +9,7 @@ export default function WomenPage() {
 		<main className="container mx-auto">
 			<WomenSlide/>
 			<h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nữ</h1>
-			<ProductWomen />
+			<ProductWomen updateTitle={true} />
 		</main>
 	);
 }
