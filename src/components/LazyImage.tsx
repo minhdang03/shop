@@ -4,45 +4,44 @@ interface LazyImageProps {
   src: string;
   alt: string;
   className?: string;
+  fallback?: string;
 }
 
-export default function LazyImage({ src, alt, className }: LazyImageProps) {
-  const [imageSrc, setImageSrc] = useState<string>('placeholder.jpg');
-  const [imageRef, setImageRef] = useState<HTMLImageElement | null>(null);
+export default function LazyImage({ 
+  src, 
+  alt, 
+  className,
+  fallback = '/images/placeholder.jpg' 
+}: LazyImageProps) {
+  const [imageSrc, setImageSrc] = useState<string>(fallback);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    let observer: IntersectionObserver;
+    const img = new Image();
+    img.src = src;
     
-    if (imageRef && imageSrc === 'placeholder.jpg') {
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setImageSrc(src);
-              observer.unobserve(imageRef);
-            }
-          });
-        },
-        { threshold: 0.1 }
-      );
-      observer.observe(imageRef);
-    }
-
-    return () => {
-      if (observer && imageRef) {
-        observer.unobserve(imageRef);
-      }
+    img.onload = () => {
+      setImageSrc(src);
+      setIsError(false);
     };
-  }, [src, imageRef, imageSrc]);
+    
+    img.onerror = () => {
+      setImageSrc(fallback);
+      setIsError(true);
+    };
+  }, [src, fallback]);
 
   return (
     <img
-      ref={setImageRef}
       src={imageSrc}
       alt={alt}
       className={`transition-opacity duration-300 ${
-        imageSrc === 'placeholder.jpg' ? 'opacity-50' : 'opacity-100'
+        isError ? 'opacity-50' : 'opacity-100'
       } ${className}`}
+      onError={() => {
+        setImageSrc(fallback);
+        setIsError(true);
+      }}
     />
   );
 } 
