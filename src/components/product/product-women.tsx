@@ -1,6 +1,7 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, memo } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { API_URL } from "../../config/constants";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Product } from "../../types/product";
@@ -15,63 +16,57 @@ interface ProductWomenProps {
   updateTitle?: boolean;
 }
 
-export default function ProductWomen({ limit = 0, updateTitle = false }: ProductWomenProps) {
-  useDocumentTitle('Nước hoa nữ', true);
-  const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [error, setError] = useState<string | null>(null);
+function ProductWomen({ limit = 0, updateTitle = false }: ProductWomenProps) {
+  useDocumentTitle(updateTitle ? 'Nước hoa nữ' : '');
+
   const { ref, inView } = useInView({
     threshold: 0,
     triggerOnce: true
   });
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(
-          `${API_URL}/api/user/products?category=676057995957fd2f56673f7d`
-        );
-        const data = await response.json();
-        if (data.success) {
-          // Lấy tất cả sản phẩm
-          setProducts(data.data);
-        } else {
-          setError("Không thể tải dữ liệu sản phẩm");
-        }
-      } catch (err) {
-        setError("Đã xảy ra lỗi khi tải dữ liệu");
-      }
-    };
-    fetchProducts();
-  }, []);
+  const { data: products = [], isLoading, error } = useQuery({
+    queryKey: ['women-products', limit],
+    queryFn: async () => {
+      const response = await fetch(
+        `${API_URL}/api/user/products?category=676057995957fd2f56673f7f${limit ? `&limit=${limit}` : ''}`
+      );
+      const data = await response.json();
+      if (!data.success) throw new Error("Không thể tải dữ liệu sản phẩm");
+      return data.data;
+    },
+    staleTime: 5 * 60 * 1000, // Cache 5 phút
+    retry: 1
+  });
 
   if (error) {
-    return <div className="text-center text-red-500 p-4">{error}</div>;
+    return <div className="text-center text-red-500 p-4">{(error as Error).message}</div>;
   }
 
-  // Nếu có limit thì chỉ hiển thị số lượng theo limit
   const displayedProducts = limit > 0 ? products.slice(0, limit) : products;
 
   return (
     <div className="container mx-auto" ref={ref}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
         {inView ? (
-          displayedProducts.map((product) => (
-            <Suspense key={product._id} fallback={<ProductSkeleton />}>
-              <ProductCard product={product} />
-            </Suspense>
+          displayedProducts.map((product: Product) => (
+            <ErrorBoundary key={product._id} fallback={<ProductSkeleton />}>
+              <Suspense fallback={<ProductSkeleton />}>
+                <ProductCard product={product} />
+              </Suspense>
+            </ErrorBoundary>
           ))
         ) : (
-          Array(limit || products.length || 3).fill(0).map((_, idx) => (
+          Array(limit || 8).fill(0).map((_, idx) => (
             <ProductSkeleton key={idx} />
           ))
         )}
       </div>
+      
       {limit > 0 && products.length > limit && inView && (
         <div className="text-center mb-8">
           <Link
             to="/nuoc-hoa-nu"
-            className="inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="inline-block px-6 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors"
           >
             Xem tất cả
           </Link>
@@ -80,3 +75,5 @@ export default function ProductWomen({ limit = 0, updateTitle = false }: Product
     </div>
   );
 }
+
+export default memo(ProductWomen);

@@ -7,25 +7,23 @@ interface SEOProps {
 }
 
 export default function SEO({ title, description, image }: SEOProps) {
-  const siteTitle = 'PINO.VN - Nước hoa chính hãng';
-  const defaultDescription = 'Chuyên cung cấp nước hoa chính hãng với mức giá tốt nhất thị trường';
-  const defaultImage = '/images/main/main.jpg';
-
   return (
     <Helmet>
-      <title>{`${title} | ${siteTitle}`}</title>
-      <meta name="description" content={description || defaultDescription} />
+      <title>{title} | PINO.VN</title>
+      <meta name="description" content={description} />
+      
+      {/* Performance optimizations */}
+      <link rel="preconnect" href="https://server.pino.vn" />
+      <link rel="dns-prefetch" href="https://server.pino.vn" />
+      
+      {/* PWA */}
+      <meta name="theme-color" content="#ffffff" />
+      <link rel="manifest" href="/manifest.json" />
       
       {/* Open Graph */}
       <meta property="og:title" content={title} />
-      <meta property="og:description" content={description || defaultDescription} />
-      <meta property="og:image" content={image || defaultImage} />
-      
-      {/* Twitter Card */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description || defaultDescription} />
-      <meta name="twitter:image" content={image || defaultImage} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={image} />
     </Helmet>
   );
 } 

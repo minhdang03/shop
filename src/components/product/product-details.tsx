@@ -18,7 +18,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const cartStore = useCartStore();
 
-  const { data: product } = useQuery<Product>({
+  const { data: product, isLoading, isError } = useQuery<Product>({
     queryKey: ['product', id],
     queryFn: async () => {
       const response = await fetch(`${API_URL}/api/user/products/${id}`);
@@ -33,12 +33,10 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
   });
 
   useEffect(() => {
-    if (product?.name) {
+    if (updateTitle && product?.name) {
       document.title = `${product.name} | Pino Perfume`;
-    } else {
-      document.title = 'Chi tiết sản phẩm | Pino Perfume';
     }
-  }, [product?.name]);
+  }, [product?.name, updateTitle]);
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
@@ -58,6 +56,8 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
     toast.success('Đã thêm vào giỏ hàng!');
   };
 
+  if (isLoading) return <div>Đang tải...</div>;
+  if (isError) return <div>Có lỗi xảy ra khi tải sản phẩm.</div>;
   if (!product) return null;
 
   return (
@@ -190,7 +190,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
 
             {/* Chính sách bán hàng */}
             <div className="mt-8 space-y-4">
-              <h2 className="text-lg font-medium">Chính sách bán hàng</h2>
+              <h2 className="text-lg font-medium">Chính sách b��n hàng</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
