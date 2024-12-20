@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Product } from '../../types/product';
 import ProductCardSkeleton from './ProductCardSkeleton';
+import { useState } from 'react';
 
 interface ProductCardProps {
   product?: Product;
@@ -8,6 +9,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, isLoading }: ProductCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   if (isLoading || !product) {
     return <ProductCardSkeleton />;
   }
@@ -23,13 +26,22 @@ export default function ProductCard({ product, isLoading }: ProductCardProps) {
       to={`/san-pham/${product._id}`}
       className="group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
     >
-      {/* Image container với tỷ lệ cố định */}
-      <div className="relative pt-[100%] w-full overflow-hidden">
+      <div className="relative pt-[100%] w-full overflow-hidden bg-gray-100">
+        <div 
+          className={`absolute inset-0 bg-gray-200 transition-opacity duration-300 ${
+            imageLoaded ? 'opacity-0' : 'opacity-100'
+          }`} 
+        />
         <img
           src={baseVariant.image}
           alt={product.name}
-          className="absolute top-0 left-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          onLoad={() => setImageLoaded(true)}
+          className={`absolute top-0 left-0 w-full h-full object-cover object-center transition-all duration-300 ${
+            imageLoaded 
+              ? 'opacity-100 group-hover:scale-105' 
+              : 'opacity-0'
+          }`}
         />
       </div>
 

@@ -35,7 +35,9 @@ export default function HomePage() {
         <img
           src="/images/main/hero.jpg"
           alt="Hero"
+          loading="eager"
           className="w-full h-full object-cover"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
           <div className="text-center text-white">
