@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 interface LazyImageProps {
   src: string;
@@ -13,35 +15,18 @@ export default function LazyImage({
   className,
   fallback = '/images/placeholder.jpg' 
 }: LazyImageProps) {
-  const [imageSrc, setImageSrc] = useState<string>(fallback);
   const [isError, setIsError] = useState(false);
 
-  useEffect(() => {
-    const img = new Image();
-    img.src = src;
-    
-    img.onload = () => {
-      setImageSrc(src);
-      setIsError(false);
-    };
-    
-    img.onerror = () => {
-      setImageSrc(fallback);
-      setIsError(true);
-    };
-  }, [src, fallback]);
-
   return (
-    <img
-      src={imageSrc}
+    <LazyLoadImage
+      src={isError ? fallback : src}
       alt={alt}
-      className={`transition-opacity duration-300 ${
-        isError ? 'opacity-50' : 'opacity-100'
-      } ${className}`}
-      onError={() => {
-        setImageSrc(fallback);
-        setIsError(true);
-      }}
+      effect="blur"
+      className={className}
+      onError={() => setIsError(true)}
+      loading="lazy"
+      threshold={100}
+      placeholderSrc={fallback}
     />
   );
 } 

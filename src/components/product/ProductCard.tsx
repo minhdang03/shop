@@ -1,71 +1,45 @@
-import { Link } from "react-router-dom";
-import { LazyLoadImage } from "react-lazy-load-image-component";
-import { useState } from "react";
-import { Product, ProductVariant } from "../../types/product";
-import BlurImage from '../shared/BlurImage';
+import { memo } from 'react';
+import { Link } from 'react-router-dom';
+import { Product } from '../../types/product';
+import LazyImage from '../LazyImage';
 
 interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
-  // State để theo dõi variant được chọn
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(product.variants[0]);
-
-  // Nếu không có variants thì return null hoặc placeholder
-  if (!product.variants?.length) {
-    return null;
-  }
-
+function ProductCard({ product }: ProductCardProps) {
+  const baseVariant = product.variants[0];
+  
   return (
-    <Link to={`/san-pham/${product._id}`} className="block h-full">
-      <div className="bg-white hover:shadow-lg hover:rounded-lg transition-shadow h-full flex flex-col group">
-        {/* Phần hình ảnh */}
-        <div className="relative h-[220px] flex items-center justify-center p-2 flex-shrink-0 transition-colors">
-          <BlurImage
-            src={selectedVariant?.image || product.images[0] || "/images/Unknown.jpg"}
-            alt={product.name}
-            className="max-h-[200px] w-auto object-contain transition-transform group-hover:scale-105"
-          />
-        </div>
-
-        {/* Phần thông tin */}
-        <div className="p-3 border-t flex flex-col flex-grow">
-          <h4 className="text-base font-medium text-gray-900 mb-2">
-            {product.name}
-          </h4>
-
-          {/* Phần chọn size */}
-          <div className="flex flex-wrap gap-2 mb-2">
-            {product.variants.map((variant) => (
-              // Chỉ hiển thị nếu có SIZE
-              variant.attributes.SIZE && (
-                <button
-                  key={variant._id}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setSelectedVariant(variant);
-                  }}
-                  className={`px-2 py-1 text-sm border transition-all ${
-                    selectedVariant._id === variant._id
-                      ? 'bg-pink-500 text-white border-pink-500'
-                      : 'bg-white text-gray-900 border-gray-200 hover:border-pink-300 hover:text-pink-500'
-                  }`}
-                >
-                  {variant.attributes.SIZE}
-                </button>
-              )
-            ))}
-          </div>
-
-          {/* Phần giá */}
-          <div className="mt-auto">
-            <p className="text-lg font-semibold text-pink-500 whitespace-nowrap overflow-hidden text-ellipsis">
-              {selectedVariant.price.toLocaleString()} VNĐ
-            </p>
-          </div>
+    <Link 
+      to={`/product/${product._id}`}
+      className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+    >
+      <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg">
+        <LazyImage
+          src={baseVariant.image}
+          alt={product.name}
+          className="w-full h-full object-cover object-center group-hover:opacity-75 transition-opacity"
+        />
+      </div>
+      
+      <div className="p-4">
+        <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
+          {product.name}
+        </h3>
+        
+        <div className="mt-2 flex items-center justify-between">
+          <p className="text-lg font-semibold text-gray-900">
+            {baseVariant.price.toLocaleString()}đ
+          </p>
+          <span className="text-sm text-gray-500">
+            {baseVariant.attributes.SIZE}
+          </span>
         </div>
       </div>
     </Link>
   );
 }
+
+// Sử dụng memo để tránh re-render không cần thiết
+export default memo(ProductCard);
