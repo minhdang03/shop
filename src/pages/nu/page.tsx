@@ -1,15 +1,21 @@
 import ProductWomen from "../../components/product/product-women";
 import WomenSlide from "../../components/slide/womenslide";
-import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import SEO from "../../components/shared/SEO";
 
 export default function WomenPage() {
-	useDocumentTitle('Nước hoa nữ');
-
 	return (
-		<main className="container mx-auto">
-			<WomenSlide/>
-			<h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nữ</h1>
-			<ProductWomen updateTitle={true} />
-		</main>
+		<>
+			<SEO 
+				title="Nước hoa nữ"
+				description="Bộ sưu tập nước hoa nữ cao cấp, chính hãng với mức giá tốt nhất thị trường"
+				image="/images/main/nu.jpg"
+				url="/nuoc-hoa-nu"
+			/>
+			<main className="container mx-auto">
+				<WomenSlide/>
+				<h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nữ</h1>
+				<ProductWomen updateTitle={false} />
+			</main>
+		</>
 	);
 }
