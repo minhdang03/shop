@@ -5,6 +5,7 @@ import MainSlide from "../components/slide/mainslide";
 import ProductMen from "../components/product/product-men";
 import ProductWomen from "../components/product/product-women";
 import { Helmet } from 'react-helmet';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
 	return (

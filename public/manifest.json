@@ -1,25 +1,29 @@
 {
-  "short_name": "PINO SHOP",
-  "name": "PINO SHOP",
+  "short_name": "PINO.VN",
+  "name": "PINO.VN - Nước hoa chính hãng",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "favicon.ico?v=2",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "favicon-192.png?v=2",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
+      "src": "favicon-512.png?v=2",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#EC4899",
+  "background_color": "#ffffff",
+  "description": "Mua nước hoa chính hãng tại PINO.VN. Giao hàng toàn quốc, đảm bảo chất lượng.",
+  "orientation": "portrait",
+  "categories": ["shopping", "lifestyle"]
 }

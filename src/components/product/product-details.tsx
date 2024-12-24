@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { API_URL } from '../../config/constants';
 import { Product, ProductVariant } from '../../types/product';
@@ -7,22 +7,25 @@ import { useCartStore } from '../../store/cart-store';
 import { toast } from 'react-hot-toast';
 import SEO from '../shared/SEO';
 import ProductDetailsSkeleton from '../shared/skeletons/ProductDetailsSkeleton';
+import { slugify } from '../../utils/slugify';
 
 interface ProductDetailsProps {
   updateTitle?: boolean;
 }
 
 export default function ProductDetails({ updateTitle = true }: ProductDetailsProps) {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const productId = location.state?.productId;
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const cartStore = useCartStore();
 
   const { data: product, isLoading } = useQuery<Product>({
-    queryKey: ['product', id],
+    queryKey: ['product', productId],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/user/products/${id}`);
+      const response = await fetch(`${API_URL}/api/user/products/${productId}`);
       const data = await response.json();
       if (data.success) {
         const defaultVariant = data.data.variants[0];
@@ -70,6 +73,7 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
         <Link 
           to={`/${product.category.name === "Nước hoa nam" ? "nuoc-hoa-nam" : "nuoc-hoa-nu"}`} 
           className="hover:text-blue-500"
+          onClick={() => window.scrollTo(0, 0)}
         >
           {product.category.name}
         </Link>

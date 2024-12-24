@@ -2,7 +2,7 @@ import {Link, Outlet} from "react-router-dom";
 import React, {useState} from "react";
 import {useCartStore} from "./store/cart-store";
 import Footer from "./components/Footer";
-    
+
 export default function Layout() {
     const cartStore = useCartStore();
     const [isMenuOpen, setIsMenuOpen] = useState(false);

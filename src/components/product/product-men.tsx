@@ -67,6 +67,7 @@ export default function ProductMen({ limit = 0, updateTitle = true }: ProductMen
           <Link
             to="/nuoc-hoa-nam"
             className="inline-block px-6 py-3 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
+            onClick={() => window.scrollTo(0, 0)}
           >
             Xem tất cả
           </Link>

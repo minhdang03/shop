@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Product, ProductVariant } from "../../types/product";
 import { useState } from "react";
 import { useInView } from 'react-intersection-observer';
+import { slugify } from '../../utils/slugify';
 
 interface ProductCardProps {
   product: Product;
@@ -21,11 +22,18 @@ function ProductCard({ product }: ProductCardProps) {
     return null;
   }
 
+  // Tạo slug cho URL
+  const productSlug = `${slugify(product.name)}-${slugify(selectedVariant.attributes.SIZE)}`;
+  const category = product.category.name === "Nước hoa nam" ? "nuoc-hoa-nam" : "nuoc-hoa-nu";
+  const productUrl = `/${category}/${productSlug}`;
+
   return (
     <Link 
-      to={`/san-pham/${product._id}`} 
+      to={productUrl}
       className="block h-full"
       ref={ref}
+      onClick={() => window.scrollTo(0, 0)}
+      state={{ productId: product._id }} // Truyền ID qua state để dùng trong API call
     >
       <div className="bg-white hover:shadow-lg hover:rounded-lg transition-shadow h-full flex flex-col group">
         {/* Phần hình ảnh */}
