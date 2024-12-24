@@ -5,6 +5,7 @@ import MainSlide from "../components/slide/mainslide";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import ProductMen from "../components/product/product-men";
 import ProductWomen from "../components/product/product-women";
+import ProductSkeleton from "../components/shared/ProductSkeleton";
 
 export default function Home() {
 	useDocumentTitle('Trang chủ', true);
@@ -18,18 +19,11 @@ export default function Home() {
 		<div className="w-full">
 			<MainSlide />
 			{loading ? (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 animate-pulse">
-					{[...Array(3)].map((_, index) => (
-						<div key={index} className="bg-gray-200 rounded-lg h-[400px]"></div>
-						))}
-				</div>
+				<ProductSkeleton />
 			) : (
 				<>
-				<h1 className="text-center text-2xl font-bold my-6 px-4">Nước Hoa Nam</h1>
+					<h1 className="text-center text-2xl font-bold my-6 px-4">Nước Hoa Nam</h1>
 					<ProductMen limit={3} updateTitle={false} />
-					
-					<h1 className="text-center text-2xl font-bold my-6 px-4">Nước Hoa Nữ</h1>
-					<ProductWomen limit={3} updateTitle={false} />
 				</>
 			)}
 		</div>

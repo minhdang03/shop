@@ -71,7 +71,7 @@ export default function ProductMen({ limit = 0, updateTitle = false }: ProductMe
         <div className="text-center mb-8">
           <Link
             to="/nuoc-hoa-nam"
-            className="inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors hover:rounded-lg"
           >
             Xem tất cả
           </Link>

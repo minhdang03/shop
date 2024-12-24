@@ -27,7 +27,7 @@ function ProductCard({ product }: ProductCardProps) {
           <BlurImage
             src={selectedVariant?.image || product.images[0] || "/images/Unknown.jpg"}
             alt={product.name}
-            className="max-h-[200px] w-auto object-contain transition-transform group-hover:scale-105"
+            className="max-h-[200px] w-auto object-contain transition-transform"
             wrapperClassName="flex items-center justify-center"
           />
         </div>
@@ -48,7 +48,7 @@ function ProductCard({ product }: ProductCardProps) {
                     e.preventDefault();
                     setSelectedVariant(variant);
                   }}
-                  className={`px-2 py-1 text-sm border rounded transition-all ${
+                  className={`px-2 py-1 text-sm border transition-all hover:rounded-lg ${
                     selectedVariant._id === variant._id
                       ? 'bg-pink-500 text-white border-pink-500'
                       : 'bg-white text-gray-900 border-gray-200 hover:border-pink-300 hover:text-pink-500'

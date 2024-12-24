@@ -52,9 +52,9 @@ export default function Layout() {
                             <Link to="/nuoc-hoa-nu" className="py-2 px-3 text-gray-700 hover:text-pink-500 transition duration-300">
                                 Nước hoa nữ
                             </Link>
-                            <Link to={'/checkout'} className="py-2 px-4 text-white bg-pink-500 hover:bg-pink-600 rounded-full transition duration-300 flex items-center">
+                            <Link to={'/checkout'} className="py-2 px-4 text-white bg-pink-500 hover:bg-pink-600 transition duration-300 hover:rounded-lg flex items-center">
                                 Giỏ hàng 
-                                <span className="ml-2 bg-white text-pink-500 rounded-full px-2 py-1 text-xs font-medium">
+                                <span className="ml-2 bg-white text-pink-500 px-2 py-1 text-xs font-medium hover:rounded-lg">
                                     {cartStore.getTotalItems()}
                                 </span>
                             </Link>
@@ -64,7 +64,7 @@ export default function Layout() {
                         <div className="md:hidden flex items-center">
                             <button 
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="p-2 rounded-full hover:bg-pink-100 focus:outline-none transition-colors"
+                                className="p-2 hover:bg-pink-100 focus:outline-none transition-colors hover:rounded-lg"
                             >
                                 <svg className="h-10 w-10 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     {isMenuOpen 
@@ -79,15 +79,15 @@ export default function Layout() {
                     {/* Mobile Navigation */}
                     <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
                         <div className="flex flex-col space-y-2 pb-4">
-                            <Link to="/nuoc-hoa-nam" className="py-2 px-3 text-gray-700 hover:text-pink-500 hover:bg-pink-50 rounded-lg transition duration-300">
+                            <Link to="/nuoc-hoa-nam" className="py-2 px-3 text-gray-700 hover:text-pink-500 hover:bg-pink-50 hover:rounded-lg transition duration-300">
                                 Nước hoa nam
                             </Link>
-                            <Link to="/nuoc-hoa-nu" className="py-2 px-3 text-gray-700 hover:text-pink-500 hover:bg-pink-50 rounded-lg transition duration-300">
+                            <Link to="/nuoc-hoa-nu" className="py-2 px-3 text-gray-700 hover:text-pink-500 hover:bg-pink-50 hover:rounded-lg transition duration-300">
                                 Nước hoa nữ
                             </Link>
-                            <Link to="/checkout" className="py-2 px-3 text-white bg-pink-500 hover:bg-pink-600 rounded-lg transition duration-300 flex items-center justify-between">
+                            <Link to="/checkout" className="py-2 px-3 text-white bg-pink-500 hover:bg-pink-600 hover:rounded-lg transition duration-300 flex items-center justify-between">
                                 Giỏ hàng 
-                                <span className="bg-white text-pink-500 rounded-full px-2 py-1 text-xs font-medium">
+                                <span className="bg-white text-pink-500 px-2 py-1 text-xs font-medium hover:rounded-lg">
                                     {cartStore.list.length}
                                 </span>
                             </Link>

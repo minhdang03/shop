@@ -24,8 +24,9 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
       const response = await fetch(`${API_URL}/api/user/products/${id}`);
       const data = await response.json();
       if (data.success) {
-        setSelectedImage(data.data.variants[0].image);
-        setSelectedVariant(data.data.variants[0]);
+        const defaultVariant = data.data.variants[0];
+        setSelectedImage(defaultVariant.image);
+        setSelectedVariant(defaultVariant);
         return data.data as Product;
       }
       throw new Error('Failed to fetch product');
@@ -132,7 +133,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
                       setSelectedVariant(variant);
                       setSelectedImage(variant.image);
                     }}
-                    className={`px-6 py-3 border-2 rounded-lg transition-all ${
+                    className={`px-6 py-3 border-2 transition-all hover:rounded-lg ${
                       selectedVariant?._id === variant._id
                         ? 'border-pink-500 bg-pink-500 text-white'
                         : 'border-gray-200 hover:border-pink-300'
@@ -148,19 +149,24 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
             {/* Giá */}
             <div className="py-6 border-y border-gray-100">
               <p className="text-3xl font-light">
-                {selectedVariant?.price === 0 
-                  ? 'Miễn phí (Tester)' 
-                  : `${selectedVariant?.price.toLocaleString()} VNĐ`
-                }
+                {!selectedVariant ? (
+                  product.variants[0]?.price === 0 
+                    ? 'Miễn phí (Tester)' 
+                    : `${product.variants[0]?.price.toLocaleString()} VNĐ`
+                ) : (
+                  selectedVariant.price === 0 
+                    ? 'Miễn phí (Tester)' 
+                    : `${selectedVariant.price.toLocaleString()} VNĐ`
+                )}
               </p>
             </div>
 
             {/* Số lượng và nút thêm vào giỏ */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center border-2 border-gray-200 rounded-lg">
+              <div className="flex items-center border-2 border-gray-200">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-4 py-3 hover:bg-gray-50"
+                  className="px-4 py-3 hover:bg-gray-50 hover:rounded-lg"
                 >
                   -
                 </button>
@@ -173,7 +179,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
                 />
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="px-4 py-3 hover:bg-gray-50"
+                  className="px-4 py-3 hover:bg-gray-50 hover:rounded-lg"
                 >
                   +
                 </button>
@@ -181,7 +187,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
 
               <button 
                 onClick={handleAddToCart}
-                className="flex-1 bg-pink-500 text-white py-4 px-6 rounded-lg hover:bg-pink-600 transition-colors"
+                className="flex-1 bg-pink-500 text-white py-4 px-6 hover:bg-pink-600 transition-colors hover:rounded-lg"
                 disabled={!selectedVariant}
               >
                 Thêm vào giỏ
@@ -203,7 +209,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                  <span>Miễn phí giao hàng từ 500.000 VNĐ</span>
+                  <span>Mi��n phí giao hàng từ 500.000 VNĐ</span>
                 </div>
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
