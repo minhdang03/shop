@@ -52,7 +52,7 @@ export default function Layout() {
                             <Link to="/nuoc-hoa-nu" className="py-2 px-3 text-gray-700 hover:text-pink-500 transition duration-300">
                                 Nước hoa nữ
                             </Link>
-                            <Link to={'/checkout'} className="py-2 px-4 text-white bg-pink-500 hover:bg-pink-600 transition duration-300 hover:rounded-lg flex items-center">
+                            <Link to="/checkout" className="py-2 px-4 text-white bg-pink-500 hover:bg-pink-600 transition duration-300 hover:rounded-lg flex items-center">
                                 Giỏ hàng 
                                 <span className="ml-2 bg-white text-pink-500 px-2 py-1 text-xs font-medium hover:rounded-lg">
                                     {cartStore.getTotalItems()}
@@ -88,7 +88,7 @@ export default function Layout() {
                             <Link to="/checkout" className="py-2 px-3 text-white bg-pink-500 hover:bg-pink-600 hover:rounded-lg transition duration-300 flex items-center justify-between">
                                 Giỏ hàng 
                                 <span className="bg-white text-pink-500 px-2 py-1 text-xs font-medium hover:rounded-lg">
-                                    {cartStore.list.length}
+                                    {cartStore.getTotalItems()}
                                 </span>
                             </Link>
                         </div>

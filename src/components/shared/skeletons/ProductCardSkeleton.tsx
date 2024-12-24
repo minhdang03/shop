@@ -1,17 +1,18 @@
 import ContentLoader from 'react-content-loader';
 
-export default function ProductSkeleton() {
+export default function ProductCardSkeleton() {
   return (
-    <div className="bg-white h-full">
+    <div className="bg-white h-full rounded">
       <ContentLoader
-        speed={2}
+        speed={1.5}
         width={300}
         height={400}
         viewBox="0 0 300 400"
         backgroundColor="#f3f3f3"
         foregroundColor="#ecebeb"
+        className="animate-pulse"
       >
-        {/* Hình ảnh sản phẩm */}
+        {/* Hình ảnh */}
         <rect x="0" y="0" rx="8" ry="8" width="300" height="220" />
         
         {/* Tên sản phẩm - 2 dòng */}

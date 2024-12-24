@@ -1,24 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { API_URL } from '../../config/constants';
 import { Product, ProductVariant } from '../../types/product';
 import { useCartStore } from '../../store/cart-store';
-import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { toast } from 'react-hot-toast';
+import SEO from '../shared/SEO';
+import ProductDetailsSkeleton from '../shared/skeletons/ProductDetailsSkeleton';
 
 interface ProductDetailsProps {
   updateTitle?: boolean;
 }
 
-export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
+export default function ProductDetails({ updateTitle = true }: ProductDetailsProps) {
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const cartStore = useCartStore();
 
-  const { data: product } = useQuery<Product>({
+  const { data: product, isLoading } = useQuery<Product>({
     queryKey: ['product', id],
     queryFn: async () => {
       const response = await fetch(`${API_URL}/api/user/products/${id}`);
@@ -32,14 +33,6 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
       throw new Error('Failed to fetch product');
     }
   });
-
-  useEffect(() => {
-    if (product?.name) {
-      document.title = `${product.name} | Pino Perfume`;
-    } else {
-      document.title = 'Chi tiết sản phẩm | Pino Perfume';
-    }
-  }, [product?.name]);
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
@@ -59,10 +52,17 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
     toast.success('Đã thêm vào giỏ hàng!');
   };
 
-  if (!product) return null;
+  if (isLoading || !product) {
+    return <ProductDetailsSkeleton />;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <SEO 
+        title={product?.name}
+        description={`Mua ${product?.name} chính hãng tại PINO.VN. Giao hàng toàn quốc, đảm bảo chất lượng.`}
+        image={product?.images[0]}
+      />
       {/* Breadcrumb */}
       <div className="mb-8 text-sm text-gray-600 pt-6">
         <Link to="/" className="hover:text-blue-500">Trang chủ</Link>
@@ -91,24 +91,24 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
         <div className="w-full md:w-1/2">
           <h1 className="text-4xl font-light mb-4">{product.name}</h1>
           
-          <div className="space-y-6">
-            {/* Rating và Trạng thái */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center">
-                <div className="flex text-pink-500 mr-2">
-                  <span>★</span>
-                  <span>★</span>
-                  <span>★</span>
-                  <span>★</span>
-                  <span>★</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                <span className="text-green-500 font-medium">Còn hàng</span>
+          {/* Rating và Trạng thái */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center">
+              <div className="flex text-pink-500 mr-2">
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              <span className="text-green-500 font-medium">Còn hàng</span>
+            </div>
+          </div>
 
+          <div className="space-y-6">
             {/* Thông tin thương hiệu */}
             <div className="flex items-center gap-4 text-gray-600">
               <div className="flex flex-col">
@@ -122,11 +122,11 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
               </div>
             </div>
 
-            {/* Phần chọn variant */}
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">Dung tích:</p>
-              <div className="flex flex-wrap gap-3">
-                {product.variants.map((variant: ProductVariant) => (
+            {/* Size */}
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Size</p>
+              <div className="flex gap-2">
+                {product.variants.map((variant) => (
                   <button
                     key={variant._id}
                     onClick={() => {
@@ -140,7 +140,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
                     }`}
                   >
                     {variant.attributes.SIZE}
-                    {variant.price === 0 && ' - Tester'}
+                    {variant.price === 0 && 'lỗi'}
                   </button>
                 ))}
               </div>
@@ -151,11 +151,11 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
               <p className="text-3xl font-light">
                 {!selectedVariant ? (
                   product.variants[0]?.price === 0 
-                    ? 'Miễn phí (Tester)' 
+                    ? 'Chủ xốp chưa để giá, inbox chửi chủ xốp yúp)' 
                     : `${product.variants[0]?.price.toLocaleString()} VNĐ`
                 ) : (
                   selectedVariant.price === 0 
-                    ? 'Miễn phí (Tester)' 
+                    ? 'Chủ xốp chưa để giá, inbox chửi chủ xốp yúp' 
                     : `${selectedVariant.price.toLocaleString()} VNĐ`
                 )}
               </p>
@@ -209,7 +209,7 @@ export default function ProductDetails({ updateTitle }: ProductDetailsProps) {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                  <span>Mi��n phí giao hàng từ 500.000 VNĐ</span>
+                  <span>Miễn phí giao hàng từ 500.000 VNĐ</span>
                 </div>
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

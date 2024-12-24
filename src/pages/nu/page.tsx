@@ -1,15 +1,17 @@
-import ProductWomen from "../../components/product/product-women";
-import WomenSlide from "../../components/slide/womenslide";
-import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { Helmet } from 'react-helmet';
+import ProductWomen from '../../components/product/product-women';
+import WomenSlide from '../../components/slide/womenslide';
 
 export default function WomenPage() {
-	useDocumentTitle('Nước hoa nữ');
-
 	return (
-		<main className="container mx-auto">
-			<WomenSlide/>
-			<h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nữ</h1>
-			<ProductWomen updateTitle={true} />
-		</main>
+		<div>
+			<Helmet>
+				<title>Nước hoa nữ | PINO.VN</title>
+			</Helmet>
+			<WomenSlide />
+			<div className="py-8">
+				<ProductWomen />
+			</div>
+		</div>
 	);
 }

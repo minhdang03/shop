@@ -1,15 +1,17 @@
-import ProductMen from "../../components/product/product-men";
-import MenSlide from "../../components/slide/menslide";
-import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { Helmet } from 'react-helmet';
+import ProductMen from '../../components/product/product-men';
+import MenSlide from '../../components/slide/menslide';
 
-export default function MenPage() {
-	useDocumentTitle('Nước hoa nam');
-	
+export default function MenPerfumePage() {
 	return (
-		<main className="container mx-auto">
-			<MenSlide/>
-			<h1 className="text-2xl font-bold my-6 px-4">Nước Hoa Nam</h1>
-			<ProductMen updateTitle={true} />
-		</main>
+		<div>
+			<Helmet>
+				<title>Nước hoa nam | PINO.VN</title>
+			</Helmet>
+			<MenSlide />
+			<div className="py-8">
+				<ProductMen />
+			</div>
+		</div>
 	);
 }
