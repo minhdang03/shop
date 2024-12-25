@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { API_URL } from '../../config/constants';
@@ -13,6 +13,12 @@ interface ProductDetailsProps {
   updateTitle?: boolean;
 }
 
+interface ImageWithVariant {
+  image: string;
+  variantId: string;
+  variantSize: string;
+}
+
 export default function ProductDetails({ updateTitle = true }: ProductDetailsProps) {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
@@ -21,25 +27,38 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const cartStore = useCartStore();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [previewVariant, setPreviewVariant] = useState<ProductVariant | null>(null);
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ['product', productId],
     queryFn: async () => {
       const response = await fetch(`${API_URL}/api/user/products/${productId}`);
       const data = await response.json();
-      if (data.success) {
-        const defaultVariant = data.data.variants[0];
-        setSelectedImage(defaultVariant.image);
-        setSelectedVariant(defaultVariant);
-        return data.data as Product;
+      if (!data.success) {
+        throw new Error('Failed to fetch product');
       }
-      throw new Error('Failed to fetch product');
+      return data.data;
     }
   });
 
+  useEffect(() => {
+    if (product && Array.isArray(product.variants) && product.variants.length > 0) {
+      const defaultVariant = product.variants[0];
+      console.log('Default Variant:', defaultVariant);
+      console.log('Images Array:', defaultVariant.images);
+      
+      if (defaultVariant && Array.isArray(defaultVariant.images) && defaultVariant.images.length > 0) {
+        console.log('Setting image:', defaultVariant.images[0]);
+        setSelectedVariant(defaultVariant);
+        setSelectedImage(defaultVariant.images[0]);
+      }
+    }
+  }, [product]);
+
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
-
     cartStore.addToCart({
       product: {
         id: product._id,
@@ -51,23 +70,80 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
       variant_id: selectedVariant._id,
       quantity: quantity
     });
-
     toast.success('Đã thêm vào giỏ hàng!');
+  };
+
+  const handleVariantClick = (variant: ProductVariant) => {
+    setSelectedVariant(variant);
+    
+    const firstImageIndex = allImages.findIndex(item => item.variantId === variant._id);
+    if (firstImageIndex !== -1) {
+      setCurrentImageIndex(firstImageIndex);
+    }
+  };
+
+  const handleImageChange = (index: number) => {
+    setCurrentImageIndex(index);
+    const selectedImage = allImages[index];
+    const variant = product?.variants.find(v => v._id === selectedImage.variantId);
+    if (variant) {
+      setSelectedVariant(variant);
+    }
+  };
+
+  const handlePrevImage = () => {
+    const newIndex = currentImageIndex === 0 ? allImages.length - 1 : currentImageIndex - 1;
+    handleImageChange(newIndex);
+  };
+
+  const handleNextImage = () => {
+    const newIndex = currentImageIndex === allImages.length - 1 ? 0 : currentImageIndex + 1;
+    handleImageChange(newIndex);
+  };
+
+  const handleThumbnailHover = (index: number) => {
+    setPreviewIndex(index);
+    const hoveredImage = allImages[index];
+    const variant = product?.variants.find(v => v._id === hoveredImage.variantId);
+    if (variant) {
+      setPreviewVariant(variant);
+    }
+  };
+
+  const handleThumbnailLeave = () => {
+    setPreviewIndex(null);
+    setPreviewVariant(null);
   };
 
   if (isLoading || !product) {
     return <ProductDetailsSkeleton />;
   }
 
+  console.log('Current State:', {
+    selectedImage,
+    selectedVariant,
+    variantImages: selectedVariant?.images
+  });
+
+  const allImages = product?.variants.reduce<ImageWithVariant[]>((acc, variant) => {
+    const variantImages = variant.images.map(img => ({
+      image: img,
+      variantId: variant._id,
+      variantSize: variant.attributes.SIZE
+    }));
+    return [...acc, ...variantImages];
+  }, []) || [];
+
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 pb-20 sm:pb-4 bg-gradient-to-b from-pink-50/50 to-white">
+    <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 pb-20 sm:pb-4">
       <SEO 
-        title={product?.name}
-        description={`Mua ${product?.name} chính hãng tại PINO.VN. Giao hàng toàn quốc, đảm bảo chất lượng.`}
-        image={product?.images[0]}
+        title={product.name}
+        description={`Mua ${product.name} chính hãng tại PINO.VN. Giao hàng toàn quốc, đảm bảo chất lượng.`}
+        image={selectedImage || selectedVariant?.images?.[0] || "/images/Unknown.jpg"}
       />
-      {/* Breadcrumb với màu gradient */}
-      <div className="mb-2 sm:mb-8 text-xs sm:text-sm text-gray-600 pt-10 sm:pt-6 md:pt-6">
+
+      {/* Breadcrumb */}
+      <div className="mb-2 sm:mb-8 text-xs sm:text-sm text-gray-600 pt-8 sm:pt-6 md:pt-6">
         <Link to="/" className="hover:text-pink-500 transition-colors">Trang chủ</Link>
         <span className="mx-2 text-pink-300">/</span>
         <Link 
@@ -80,38 +156,84 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-12">
-        {/* Phần hình ảnh với shadow và border */}
-        <div className="w-full md:w-1/2">
-          <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-8 shadow-lg hover:shadow-xl transition-shadow border border-pink-100">
+        {/* Phần hình ảnh */}
+        <div className="w-full md:w-[45%]">
+          
+
+          {/* Hình ảnh chính */}
+          <div className="relative bg-white rounded-xl sm:rounded-2xl p-1 sm:p-2 shadow-lg hover:shadow-xl transition-shadow border border-pink-100">
             <img
-              src={selectedVariant?.image || "/images/Unknown.jpg"}
+              src={previewIndex !== null ? allImages[previewIndex]?.image : allImages[currentImageIndex]?.image || "/images/Unknown.jpg"}
               alt={product.name}
-              className="w-full h-[250px] sm:h-[500px] object-contain mix-blend-multiply hover:scale-105 transition-transform duration-300"
+              className="w-full h-[300px] sm:h-[350px] md:h-[400px] object-contain mix-blend-multiply hover:scale-105 transition-transform duration-300"
             />
+            
+            {/* Nút điều hướng */}
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-white/90 w-6 h-6 sm:w-8 sm:h-8 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-white/90 w-6 h-6 sm:w-8 sm:h-8 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Gallery thumbnails*/}
+          <div className="flex pt-2 sm:pt-3 justify-center gap-1 overflow-x-auto pb-1 mb-2 scrollbar-thin scrollbar-thumb-pink-200 scrollbar-track-transparent">
+            {allImages.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => handleImageChange(index)}
+                onMouseEnter={() => handleThumbnailHover(index)}
+                onMouseLeave={handleThumbnailLeave}
+                className={`relative flex-shrink-0 w-8 sm:w-10 h-8 sm:h-10 border transition-all ${
+                  currentImageIndex === index 
+                    ? 'border-pink-500 ring-1 ring-pink-500 shadow-md scale-105' 
+                    : previewIndex === index
+                    ? 'border-pink-300 ring-1 ring-pink-300 shadow-sm scale-[1.02]'
+                    : 'border-gray-200 hover:border-pink-200'
+                } rounded-md overflow-hidden`}
+              >
+                <img
+                  src={item.image}
+                  alt={`${product.name} - ${index + 1}`}
+                  className={`w-full h-full object-contain transition-opacity duration-200 ${
+                    currentImageIndex === index 
+                      ? 'opacity-100' 
+                      : previewIndex === index
+                      ? 'opacity-90'
+                      : 'opacity-60 hover:opacity-90'
+                  }`}
+                />
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Phần thông tin với các điểm nhấn màu sắc */}
-        <div className="w-full md:w-1/2">
+        {/* Phần thông tin */}
+        <div className="w-full md:w-[55%]">
           <h1 className="text-xl sm:text-4xl font-light mb-2 sm:mb-4 bg-gradient-to-r from-pink-600 to-pink-400 bg-clip-text text-transparent">
             {product.name}
           </h1>
           
-          {/* Rating và Trạng thái */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mb-4 sm:mb-6">
-            <div className="flex items-center">
-              <div className="flex text-yellow-500 mr-2 text-sm sm:text-base animate-pulse">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-green-500 font-medium text-sm sm:text-base">Còn hàng</span>
+          {/* Rating */}
+          <div className="flex items-center mb-4">
+            <div className="flex text-yellow-400 mr-2">
+              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
             </div>
           </div>
 
           <div className="space-y-3 sm:space-y-6">
-            {/* Thông tin thương hiệu với gradient */}
+            {/* Thông tin thương hiệu */}
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-gray-600 p-4 rounded-lg bg-gradient-to-r from-pink-50 to-purple-50">
               <div className="flex flex-col">
                 <span className="text-xs sm:text-sm text-pink-400">Thương hiệu</span>
@@ -124,43 +246,51 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
               </div>
             </div>
 
-            {/* Size buttons với hiệu ứng */}
+            {/* Size buttons */}
             <div>
               <p className="text-xs sm:text-sm text-pink-400 mb-2">Size</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {product.variants.map((variant) => (
                   <button
                     key={variant._id}
-                    onClick={() => {
-                      setSelectedVariant(variant);
-                      setSelectedImage(variant.image);
-                    }}
-                    className={`px-3 sm:px-6 py-1.5 sm:py-3 border-2 text-sm sm:text-base transition-all hover:scale-105 ${
+                    onClick={() => handleVariantClick(variant)}
+                    className={`px-2 sm:px-6 py-1 sm:py-3 border text-sm sm:text-base transition-all ${
                       selectedVariant?._id === variant._id
-                        ? 'border-pink-500 bg-gradient-to-r from-pink-500 to-pink-400 text-white shadow-lg'
-                        : 'border-pink-200 hover:border-pink-300 hover:bg-pink-50'
+                        ? 'border-pink-400 bg-pink-400/10 text-pink-500'
+                        : previewVariant?._id === variant._id
+                        ? 'border-pink-300 bg-pink-300/5 text-pink-400'
+                        : 'border-gray-200 hover:border-pink-200 hover:bg-pink-50/50'
                     } rounded-lg`}
                   >
                     {variant.attributes.SIZE}
-                    {variant.price === 0 && 'lỗi'}
+                    {variant.price === 0 && ' - Liên hệ'}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Giá với gradient text */}
-            <div className="py-3 sm:py-6 border-y border-pink-100">
-              <p className="text-xl sm:text-3xl font-light bg-gradient-to-r from-pink-600 to-pink-400 bg-clip-text text-transparent">
-                {!selectedVariant ? (
-                  product.variants[0]?.price === 0 
+            {/* Giá và trạng thái */}
+            <div className="py-2 sm:py-6 border-y border-pink-100">
+              <div className="flex items-center gap-3">
+                <p className="text-2xl sm:text-4xl font-semibold text-pink-500">
+                  {previewVariant ? (
+                    previewVariant.price === 0 
+                      ? 'Liên hệ' 
+                      : `${previewVariant.price.toLocaleString()} VNĐ`
+                  ) : selectedVariant ? (
+                    selectedVariant.price === 0 
+                      ? 'Liên hệ' 
+                      : `${selectedVariant.price.toLocaleString()} VNĐ`
+                  ) : product.variants[0]?.price === 0 
                     ? 'Liên hệ' 
-                    : `${product.variants[0]?.price.toLocaleString()} VNĐ`
-                ) : (
-                  selectedVariant.price === 0 
-                    ? 'Liên hệ' 
-                    : `${selectedVariant.price.toLocaleString()} VNĐ`
-                )}
-              </p>
+                    : `${product.variants[0]?.price?.toLocaleString() || 0} VNĐ`
+                  }
+                </p>
+                <div className="flex items-center gap-1.5 bg-green-50/80 px-2 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                  <span className="text-green-600 text-sm">Còn hàng</span>
+                </div>
+              </div>
             </div>
 
             {/* Số lượng và nút thêm vào giỏ */}

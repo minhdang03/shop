@@ -14,6 +14,25 @@ interface CartItem {
   };
 }
 
+interface CartProduct {
+  id: string;
+  name: string;
+  price: number;
+  variant: {
+    _id: string;
+    sku: string;
+    name: string;
+    images: string[];
+    attributes: {
+      SIZE: string;
+    };
+    price: number;
+    costPrice: number;
+    stock: number;
+    active: boolean;
+  };
+}
+
 interface CartStore {
   items: CartItem[];
   addToCart: (item: CartItem) => void;

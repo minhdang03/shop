@@ -3,12 +3,14 @@ export interface ProductVariant {
   sku: string;
   name: string;
   image: string;
+  images: string[];
   attributes: {
     SIZE: string;
   };
   price: number;
   costPrice: number;
   stock: number;
+  active: boolean;
 }
 
 export interface Product {
@@ -24,6 +26,6 @@ export interface Product {
     name: string;
   };
   variants: ProductVariant[];
-  images: string[];
-  price: number;
+  images?: string[];
+  price?: number;
 } 

@@ -9,7 +9,11 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product }: ProductCardProps) {
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(product.variants[0]);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(() => {
+    return product.variants && product.variants.length > 0 
+      ? product.variants[0] 
+      : null;
+  });
   const [imageLoaded, setImageLoaded] = useState(false);
   const { ref, inView } = useInView({
     triggerOnce: true,
@@ -17,15 +21,15 @@ function ProductCard({ product }: ProductCardProps) {
   });
 
   useEffect(() => {
-    console.log('Selected Variant changed:', {
+    console.log('Selected Variant changed:', selectedVariant ? {
       id: selectedVariant._id,
       productImages: product.images,
       size: selectedVariant.attributes.SIZE,
       price: selectedVariant.price
-    });
-  }, [selectedVariant]);
+    } : 'No variant selected');
+  }, [selectedVariant, product.images]);
 
-  if (!product.variants?.length) {
+  if (!product.variants?.length || !selectedVariant) {
     return null;
   }
 
@@ -55,8 +59,8 @@ function ProductCard({ product }: ProductCardProps) {
                 <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-lg" />
               )}
               <img
-                key={selectedVariant._id}
-                src={product.images[0] || "/images/Unknown.jpg"}
+                key={selectedVariant?._id}
+                src={selectedVariant?.images?.[0] || "/images/Unknown.jpg"}
                 alt={product.name}
                 className={`max-h-[200px] w-auto object-contain transition-transform group-hover:scale-105 ${
                   imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -79,7 +83,7 @@ function ProductCard({ product }: ProductCardProps) {
                 key={variant._id}
                 onClick={(e) => handleVariantClick(variant, e)}
                 className={`px-2 py-1 text-sm border transition-all hover:rounded-lg ${
-                  selectedVariant._id === variant._id
+                  selectedVariant?._id === variant._id
                     ? 'bg-pink-500 text-white border-pink-500'
                     : 'bg-white text-gray-900 border-gray-200 hover:border-pink-300 hover:text-pink-500'
                 }`}
@@ -93,9 +97,9 @@ function ProductCard({ product }: ProductCardProps) {
 
           <div className="mt-auto">
             <p className="text-lg font-semibold text-pink-500 whitespace-nowrap overflow-hidden text-ellipsis">
-              {selectedVariant.price === 0 
+              {selectedVariant?.price === 0 
                 ? `Liên hệ`
-                : `${selectedVariant.price.toLocaleString()} VNĐ`
+                : `${selectedVariant?.price.toLocaleString()} VNĐ`
               }
             </p>
           </div>

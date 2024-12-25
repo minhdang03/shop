@@ -97,8 +97,8 @@ export default function Layout() {
             </nav>
 
             {/* Main Content */}
-            <main className="w-screen mt-16">
-                <div className="w-full max-w-[1200px] md:max-w-none md:w-[95%] lg:w-[90%] mx-auto px-4">
+            <main className="w-screen mt-16 bg-gradient-to-b from-pink-50/50 to-white">
+                <div className="w-full max-w-[1200px] md:max-w-none md:w-[95%] lg:w-[90%] mx-auto px-4 ">
                     <Outlet/>
                 </div>
             </main>

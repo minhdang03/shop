@@ -163,14 +163,14 @@ export default function Checkout() {
                   className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="w-24 h-24 bg-white rounded-md flex-shrink-0">
-                    {item.product?.variant?.image ? (
+                    {item.product?.variant?.images?.[0] ? (
                       <img 
-                        src={item.product.variant.image} 
+                        src={item.product.variant.images[0]}
                         alt={item.product.name}
                         className="w-full h-full object-contain rounded-md"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center">
+                      <div className="w-full h-full bg-gray-100 rounded-md flex items-center justify-center">
                         <span className="text-gray-400">No image</span>
                       </div>
                     )}
