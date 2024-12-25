@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { API_URL } from '../../config/constants';
 import { Product, ProductVariant } from '../../types/product';
 import { useCartStore } from '../../store/cart-store';
 import { toast } from 'react-hot-toast';
 import SEO from '../shared/SEO';
 import ProductDetailsSkeleton from '../shared/skeletons/ProductDetailsSkeleton';
+import { generateVariantSlug } from '../../utils/variant-utils';
 import { slugify } from '../../utils/slugify';
 
 interface ProductDetailsProps {
@@ -21,41 +22,78 @@ interface ImageWithVariant {
 
 export default function ProductDetails({ updateTitle = true }: ProductDetailsProps) {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const variantParam = searchParams.get('v');
   const location = useLocation();
-  const productId = location.state?.productId;
-  const [selectedImage, setSelectedImage] = useState<string>('');
-  const [quantity, setQuantity] = useState<number>(1);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
-  const cartStore = useCartStore();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
-  const [previewVariant, setPreviewVariant] = useState<ProductVariant | null>(null);
-
+  const navigate = useNavigate();
+  
   const { data: product, isLoading } = useQuery<Product>({
-    queryKey: ['product', productId],
+    queryKey: ['product', slug],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/user/products/${productId}`);
+      const response = await fetch(`${API_URL}/api/user/products/base-slug/${slug}`);
       const data = await response.json();
       if (!data.success) {
         throw new Error('Failed to fetch product');
       }
       return data.data;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
-  useEffect(() => {
-    if (product && Array.isArray(product.variants) && product.variants.length > 0) {
-      const defaultVariant = product.variants[0];
-      console.log('Default Variant:', defaultVariant);
-      console.log('Images Array:', defaultVariant.images);
-      
-      if (defaultVariant && Array.isArray(defaultVariant.images) && defaultVariant.images.length > 0) {
-        console.log('Setting image:', defaultVariant.images[0]);
-        setSelectedVariant(defaultVariant);
-        setSelectedImage(defaultVariant.images[0]);
-      }
-    }
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [previewVariant, setPreviewVariant] = useState<ProductVariant | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const cartStore = useCartStore();
+
+  const allImages = useMemo(() => {
+    if (!product?.variants) return [];
+    return product.variants.reduce((acc: ImageWithVariant[], variant: ProductVariant) => {
+      const variantImages = variant.images.map((img: string) => ({
+        image: img,
+        variantId: variant._id,
+        variantSize: variant.attributes.SIZE
+      }));
+      return [...acc, ...variantImages];
+    }, []);
   }, [product]);
+
+  useEffect(() => {
+    if (!product?.variants) return;
+
+    const matchingVariant = product.variants.find(variant => 
+      slugify(variant.attributes.SIZE) === variantParam
+    );
+
+    if (matchingVariant) {
+      setSelectedVariant(matchingVariant);
+      const variantImageIndex = allImages.findIndex(img => 
+        img.variantId === matchingVariant._id
+      );
+      if (variantImageIndex !== -1) {
+        setCurrentImageIndex(variantImageIndex);
+      }
+    } else {
+      const defaultVariant = product.variants[0];
+      setSelectedVariant(defaultVariant);
+      setSearchParams({ v: slugify(defaultVariant.attributes.SIZE) });
+    }
+  }, [product, variantParam, allImages]);
+
+  const handleVariantClick = useCallback((variant: ProductVariant) => {
+    if (!product) return;
+    
+    setSelectedVariant(variant);
+    const firstImageIndex = allImages.findIndex((item: ImageWithVariant) => 
+      item.variantId === variant._id
+    );
+    if (firstImageIndex !== -1) {
+      setCurrentImageIndex(firstImageIndex);
+    }
+
+    setSearchParams({ v: slugify(variant.attributes.SIZE) });
+  }, [product, allImages, setSearchParams]);
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
@@ -73,19 +111,10 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
     toast.success('Đã thêm vào giỏ hàng!');
   };
 
-  const handleVariantClick = (variant: ProductVariant) => {
-    setSelectedVariant(variant);
-    
-    const firstImageIndex = allImages.findIndex(item => item.variantId === variant._id);
-    if (firstImageIndex !== -1) {
-      setCurrentImageIndex(firstImageIndex);
-    }
-  };
-
   const handleImageChange = (index: number) => {
     setCurrentImageIndex(index);
     const selectedImage = allImages[index];
-    const variant = product?.variants.find(v => v._id === selectedImage.variantId);
+    const variant = product?.variants.find((v: ProductVariant) => v._id === selectedImage.variantId);
     if (variant) {
       setSelectedVariant(variant);
     }
@@ -115,31 +144,26 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
     setPreviewVariant(null);
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   if (isLoading || !product) {
     return <ProductDetailsSkeleton />;
   }
 
   console.log('Current State:', {
-    selectedImage,
+    selectedImage: allImages[currentImageIndex]?.image,
     selectedVariant,
     variantImages: selectedVariant?.images
   });
-
-  const allImages = product?.variants.reduce<ImageWithVariant[]>((acc, variant) => {
-    const variantImages = variant.images.map(img => ({
-      image: img,
-      variantId: variant._id,
-      variantSize: variant.attributes.SIZE
-    }));
-    return [...acc, ...variantImages];
-  }, []) || [];
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 pb-20 sm:pb-4">
       <SEO 
         title={product.name}
         description={`Mua ${product.name} chính hãng tại PINO.VN. Giao hàng toàn quốc, đảm bảo chất lượng.`}
-        image={selectedImage || selectedVariant?.images?.[0] || "/images/Unknown.jpg"}
+        image={allImages[currentImageIndex]?.image || selectedVariant?.images?.[0] || "/images/Unknown.jpg"}
       />
 
       {/* Breadcrumb */}
@@ -250,7 +274,7 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
             <div>
               <p className="text-xs sm:text-sm text-pink-400 mb-2">Size</p>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {product.variants.map((variant) => (
+                {product.variants.map((variant: ProductVariant) => (
                   <button
                     key={variant._id}
                     onClick={() => handleVariantClick(variant)}

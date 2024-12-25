@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Product, ProductVariant } from "../../types/product";
 import { useInView } from 'react-intersection-observer';
 import { slugify } from '../../utils/slugify';
@@ -9,6 +9,7 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(() => {
     return product.variants && product.variants.length > 0 
       ? product.variants[0] 
@@ -20,22 +21,17 @@ function ProductCard({ product }: ProductCardProps) {
     threshold: 0.1
   });
 
-  useEffect(() => {
-    console.log('Selected Variant changed:', selectedVariant ? {
-      id: selectedVariant._id,
-      productImages: product.images,
-      size: selectedVariant.attributes.SIZE,
-      price: selectedVariant.price
-    } : 'No variant selected');
-  }, [selectedVariant, product.images]);
+  const categoryPath = product.category.name === "Nước hoa nam" ? "nuoc-hoa-nam" : "nuoc-hoa-nu";
+  const baseSlug = slugify(product.name);
 
-  if (!product.variants?.length || !selectedVariant) {
-    return null;
-  }
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!selectedVariant) return;
 
-  const productSlug = `${slugify(product.name)}-${slugify(selectedVariant.attributes.SIZE)}`;
-  const category = product.category.name === "Nước hoa nam" ? "nuoc-hoa-nam" : "nuoc-hoa-nu";
-  const productUrl = `/${category}/${productSlug}`;
+    const path = `/${categoryPath}/${baseSlug}?v=${slugify(selectedVariant.attributes.SIZE)}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate(path);
+  };
 
   const handleVariantClick = (variant: ProductVariant, e: React.MouseEvent) => {
     e.preventDefault();
@@ -44,12 +40,15 @@ function ProductCard({ product }: ProductCardProps) {
     setImageLoaded(false);
   };
 
+  if (!product.variants?.length || !selectedVariant) {
+    return null;
+  }
+
   return (
-    <Link 
-      to={productUrl}
-      className="block h-full"
+    <div 
+      onClick={handleCardClick}
+      className="cursor-pointer"
       ref={ref}
-      state={{ productId: product._id }}
     >
       <div className="bg-white hover:shadow-lg hover:rounded-lg transition-shadow h-full flex flex-col group">
         <div className="relative h-[220px] flex items-center justify-center p-2 flex-shrink-0 transition-colors">
@@ -60,9 +59,9 @@ function ProductCard({ product }: ProductCardProps) {
               )}
               <img
                 key={selectedVariant?._id}
-                src={selectedVariant?.images?.[0] || "/images/Unknown.jpg"}
+                src={selectedVariant?.images?.[0] || selectedVariant?.image || "/images/Unknown.jpg"}
                 alt={product.name}
-                className={`max-h-[200px] w-auto object-contain transition-transform group-hover:scale-105 ${
+                className={`max-h-[200px] w-auto object-contain mix-blend-multiply transition-transform group-hover:scale-105 ${
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
                 loading="lazy"
@@ -105,7 +104,7 @@ function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
