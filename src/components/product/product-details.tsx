@@ -27,7 +27,7 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
   const location = useLocation();
   const navigate = useNavigate();
   
-  const { data: product, isLoading } = useQuery<Product>({
+  const { data: product, isLoading } = useQuery<Product & { meta?: any }>({
     queryKey: ['product', slug],
     queryFn: async () => {
       const response = await fetch(`${API_URL}/api/user/products/base-slug/${slug}`);
@@ -35,7 +35,10 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
       if (!data.success) {
         throw new Error('Failed to fetch product');
       }
-      return data.data;
+      return {
+        ...data.data,
+        meta: data.meta
+      };
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -161,9 +164,18 @@ export default function ProductDetails({ updateTitle = true }: ProductDetailsPro
   return (
     <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 pb-20 sm:pb-4">
       <SEO 
-        title={product.name}
-        description={`Mua ${product.name} chính hãng tại PINO.VN. Giao hàng toàn quốc, đảm bảo chất lượng.`}
-        image={allImages[currentImageIndex]?.image || selectedVariant?.images?.[0] || "/images/Unknown.jpg"}
+        {...(product?.meta || {
+          title: `${product?.name} | PINO.VN`,
+          description: `${product?.name} ${selectedVariant?.attributes.SIZE || ''} - ${
+            product?.description?.slice(0, 150) || 
+            `Mua ${product?.name} chính hãng, giá tốt nhất tại PINO.VN.`
+          }`,
+          image: selectedVariant?.images?.[0] || allImages[currentImageIndex]?.image || '/images/Unknown.jpg',
+          url: `https://pino.vn/${
+            product?.category.name === "Nước hoa nam" ? "nuoc-hoa-nam" : "nuoc-hoa-nu"
+          }/${slug}?v=${slugify(selectedVariant?.attributes.SIZE || '')}`,
+          type: 'product'
+        })}
       />
 
       {/* Breadcrumb */}
